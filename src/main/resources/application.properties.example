@@ -1,0 +1,10 @@
+# Пример конфигурации
+spring.datasource.url=jdbc:postgresql://localhost:5432/mydb
+spring.datasource.username=myusername
+spring.datasource.password=mypassword
+
+# Настройки электронной почты
+spring.mail.host=smtp.example.com
+spring.mail.port=587
+spring.mail.username=myemail@example.com
+spring.mail.password=mypassword
