@@ -7,4 +7,4 @@ INSERT INTO nsi_auto_model (model) VALUES ('VAZ');
 INSERT INTO nsi_auto_model (model) VALUES ('TOYOTA');
 INSERT INTO nsi_auto_model (model) VALUES ('BMW');
 INSERT INTO nsi_auto_model (model) VALUES ('HONDA');
-INSERT INTO nsi_auto_model (model) VALUES ('HONDA');
+
