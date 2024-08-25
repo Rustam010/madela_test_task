@@ -3,8 +3,8 @@ CREATE TABLE nsi_auto_model(
     model VARCHAR(50) NOT NULL
 );
 
--- Вставка тестовых данных в таблицу nsi_auto_model
 INSERT INTO nsi_auto_model (model) VALUES ('VAZ');
 INSERT INTO nsi_auto_model (model) VALUES ('TOYOTA');
 INSERT INTO nsi_auto_model (model) VALUES ('BMW');
+INSERT INTO nsi_auto_model (model) VALUES ('HONDA');
 INSERT INTO nsi_auto_model (model) VALUES ('HONDA');
