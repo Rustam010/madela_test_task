@@ -1,4 +1,4 @@
-package com.konkov.CarApp.exceptionHandling.carExceptions;
+package com.konkov.CarApp.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

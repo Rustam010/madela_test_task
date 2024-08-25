@@ -3,12 +3,17 @@ package com.konkov.CarApp.services;
 import com.konkov.CarApp.dto.CarDTO;
 import com.konkov.CarApp.entity.Car;
 import com.konkov.CarApp.events.CarAddedEventPublisher;
-import com.konkov.CarApp.exceptionHandling.carExceptions.NotFoundCarException;
+import com.konkov.CarApp.exception.carExceptions.CarNotCreatedException;
+import com.konkov.CarApp.exception.carExceptions.ModelNotExistException;
+import com.konkov.CarApp.exception.carExceptions.NotFoundCarException;
+import com.konkov.CarApp.repositories.CarModelRepository;
 import com.konkov.CarApp.repositories.CarRepository;
 import com.konkov.CarApp.util.MappingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +24,15 @@ public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
     private final MappingUtil mappingUtil;
     private final CarAddedEventPublisher carAddedEventPublisher;
+    private final CarModelRepository carModelRepository;
 
     @Autowired
-    public CarServiceImpl(CarRepository carRepository, MappingUtil mappingUtil, CarAddedEventPublisher carAddedEventPublisher) {
+    public CarServiceImpl(CarRepository carRepository, MappingUtil mappingUtil,
+                          CarAddedEventPublisher carAddedEventPublisher, CarModelRepository carModelRepository) {
         this.carRepository = carRepository;
         this.mappingUtil = mappingUtil;
         this.carAddedEventPublisher = carAddedEventPublisher;
+        this.carModelRepository = carModelRepository;
     }
 
     @Transactional(readOnly = true)
@@ -47,15 +55,41 @@ public class CarServiceImpl implements CarService {
         return mappingUtil.mapToCarDTO(car);
     }
 
+
     @Transactional
     @Override
-    public void saveCar(Car car) {
+    public void saveCar(CarDTO carDTO, BindingResult bindingResult) {
+
+        validCheck(carDTO, bindingResult);
+
+        Car car = mappingUtil.mapToCar(carDTO);
         carRepository.save(car);
 
         // Публикуем событие после сохранения автомобиля
         carAddedEventPublisher.publishCarAddedEvent(car);
     }
 
+
+    private void validCheck(CarDTO carDTO, BindingResult bindingResult) {
+        //Проверка валидности всех полей
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMessage = new StringBuilder();
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                errorMessage.append(error.getField()).append(" - ")
+                        .append(error.getDefaultMessage()).append(";");
+            }
+            throw new CarNotCreatedException(errorMessage.toString());
+        }
+
+        //Проверка, существует ли передаваемая марка автомобиля в nsi_auto_model
+        if (!carModelRepository.existsByModel(carDTO.getCarModel())) {
+            throw new ModelNotExistException("Марка авто отсутствует");
+        }
+    }
+
+
+    @Transactional(readOnly = true)
     @Override
     public List<CarDTO> getFilteredCars(String color, Integer year, String country, Integer numberOfOwners, String model) {
         List<Car> cars = carRepository.findAll();
@@ -74,7 +108,5 @@ public class CarServiceImpl implements CarService {
 
         return filteredCars;
     }
-
-
 
 }

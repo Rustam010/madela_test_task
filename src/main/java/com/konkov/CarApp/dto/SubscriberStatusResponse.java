@@ -1,4 +1,4 @@
-package com.konkov.CarApp.exceptionHandling.subscriberExceptions;
+package com.konkov.CarApp.dto;
 
 public class SubscriberStatusResponse {
     private String message;

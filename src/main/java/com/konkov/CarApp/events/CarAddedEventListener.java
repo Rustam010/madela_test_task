@@ -1,5 +1,6 @@
 package com.konkov.CarApp.events;
 
+import com.konkov.CarApp.dto.SubscriberDTO;
 import com.konkov.CarApp.entity.Car;
 import com.konkov.CarApp.entity.Subscriber;
 import com.konkov.CarApp.services.MailService;
@@ -26,9 +27,9 @@ public class CarAddedEventListener {
     @EventListener
     public void handleCarAddedEvent(CarAddedEvent event) {
         Car car = event.getCar();
-        List<Subscriber> subscribers = subscriberService.findAllByModel(car.getCarModel().getModel());
+        List<SubscriberDTO> subscribers = subscriberService.findAllByModel(car.getCarModel().getModel());
 
-        for (Subscriber subscriber : subscribers) {
+        for (SubscriberDTO subscriber : subscribers) {
             String subject = "Новый автомобиль в продаже!";
             String text = "Автомобиль " + car.getCarModel().getModel() + " поступил в продажу";
             emailService.sendEmail(subscriber.getEmail(), subject, text);

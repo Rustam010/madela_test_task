@@ -22,7 +22,6 @@ public class CarDTO {
     @Size(min = 2, max = 30, message = "Страна должна быть в пределах от 2 до 30 символов")
     private String country;
 
-    @Column(name = "number_of_owners")
     @Min(value = 0, message = "Количество владельцев не может быть отрицательным")
     private int numberOfOwners;
 

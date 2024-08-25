@@ -1,13 +1,10 @@
 package com.konkov.CarApp.controllers;
 
 import com.konkov.CarApp.dto.CarDTO;
-import com.konkov.CarApp.entity.Car;
 
 
 import com.konkov.CarApp.events.CarAddedEventPublisher;
-import com.konkov.CarApp.exceptionHandling.carExceptions.CarNotCreatedException;
-import com.konkov.CarApp.exceptionHandling.carExceptions.CarStatusResponse;
-import com.konkov.CarApp.exceptionHandling.carExceptions.ModelNotExistException;
+import com.konkov.CarApp.dto.CarStatusResponse;
 import com.konkov.CarApp.services.CarModelService;
 import com.konkov.CarApp.services.CarService;
 import com.konkov.CarApp.util.MappingUtil;
@@ -16,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,7 +27,7 @@ public class CarController {
 
     @Autowired
     public CarController(MappingUtil mappingUtil, CarService carService,
-                         CarModelService carModelService,CarAddedEventPublisher carAddedEventPublisher) {
+                         CarModelService carModelService, CarAddedEventPublisher carAddedEventPublisher) {
         this.mappingUtil = mappingUtil;
         this.carService = carService;
         this.carModelService = carModelService;
@@ -46,54 +42,29 @@ public class CarController {
 
     @GetMapping("/{id}")
     public CarDTO getCarById(@PathVariable int id) {
-        CarDTO carDTO = carService.getCarById(id);
-        return carDTO;
+        return carService.getCarById(id);
     }
 
 
-
-    //В случае успешного добавления возвращается CarStatusResponse
     @PostMapping()
     public ResponseEntity<CarStatusResponse> create(@RequestBody @Valid CarDTO carDTO, BindingResult bindingResult) {
-
-        //Проверка валидности всех полей
-        if (bindingResult.hasErrors()){
-            StringBuilder errorMessage = new StringBuilder();
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                errorMessage.append(error.getField()).append(" - ")
-                                .append(error.getDefaultMessage()).append(";");
-            }
-            throw new CarNotCreatedException(errorMessage.toString());
-        }
-
-        //Проверка, существует ли передаваемая марка автомобиля в nsi_auto_model
-        if (!carModelService.isCarModelExists(carDTO.getCarModel())){
-            throw new ModelNotExistException("Марка авто отсутствует");
-        }
-
-        Car car = mappingUtil.mapToCar(carDTO);
-        carService.saveCar(car);
-
-        //Добавляет event при создании нового автомобиля
-        carAddedEventPublisher.publishCarAddedEvent(car);
+        carService.saveCar(carDTO, bindingResult);
 
         CarStatusResponse carStatusResponse = new CarStatusResponse();
         carStatusResponse.setStatus("Успешно добавлено");
-        
+
         return new ResponseEntity<>(carStatusResponse, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<CarDTO> getCarsByKeys(@RequestParam(required = false) String color,
-                                      @RequestParam(required = false) Integer year,
-                                      @RequestParam(required = false) String country,
-                                      @RequestParam(required = false) Integer numberOfOwner,
-                                      @RequestParam(required = false) String model) {
+    public List<CarDTO> getFilteredCars(@RequestParam(required = false) String color,
+                                        @RequestParam(required = false) Integer year,
+                                        @RequestParam(required = false) String country,
+                                        @RequestParam(required = false) Integer numberOfOwner,
+                                        @RequestParam(required = false) String model) {
 
         //Возвращает список отфильтрованных машин
-        List<CarDTO> cars = carService.getFilteredCars(color, year, country, numberOfOwner, model);
-        return cars;
+        return carService.getFilteredCars(color, year, country, numberOfOwner, model);
     }
 
 
