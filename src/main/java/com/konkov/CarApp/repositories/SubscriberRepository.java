@@ -10,4 +10,5 @@ import java.util.List;
 public interface SubscriberRepository extends JpaRepository<Subscriber, Integer> {
     List<Subscriber> findAllByModel(String model);
     boolean existsByEmailAndModel(String email, String model);
+
 }

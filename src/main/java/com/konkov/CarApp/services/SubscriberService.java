@@ -1,11 +1,13 @@
 package com.konkov.CarApp.services;
 
+import com.konkov.CarApp.dto.SubscriberDTO;
 import com.konkov.CarApp.entity.Subscriber;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 
 public interface SubscriberService {
-    public void subscribe(String email, String model);
-    public List<Subscriber> findAllByModel(String model);
+    public void subscribe(SubscriberDTO subscriberDTO, BindingResult bindingResult);
+    public List<SubscriberDTO> findAllByModel(String model);
 
 }
